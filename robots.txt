@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jmsbrn.github.io/balans-pro/sitemap.xml

@@ -22,11 +22,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Build inner pages, sitemap and robots.txt
+        run: python3 build.py
+      # Only the site itself is published: sources in _src/, build.py and README stay out of reach of crawlers
+      - name: Collect site files
+        run: |
+          mkdir _site
+          cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir privacy _site/
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
