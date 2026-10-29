@@ -26,7 +26,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/balans-pro/styles.css">
 
 </head>
@@ -57,14 +57,16 @@
   <symbol id="i-viber" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.5 0 9 2.7 9 8.5S17.5 19 12 19c-.8 0-1.6-.1-2.3-.2L6 21.5V18c-2-1.4-3-4-3-7.5C3 4.7 6.5 2 12 2zm-2.6 4.6c-.3 0-.7.1-1 .5-.4.4-.9 1.2-.6 2.3.6 2.1 2.4 4.4 4.8 5.6 1.2.6 2 .4 2.5 0 .4-.4.5-.8.4-1.1l-1.6-1c-.3-.2-.6-.1-.8.1l-.5.6c-.9-.3-2.1-1.5-2.4-2.4l.6-.5c.2-.2.3-.5.1-.8l-1-1.6c-.1-.2-.3-.3-.5-.3z"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path fill="currentColor" d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4 6.4 5z"/></symbol>
   <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="currentColor" d="M7.4 8.6L12 13.2l4.6-4.6L18 10l-6 6-6-6 1.4-1.4z"/></symbol>
-  <symbol id="i-cup" viewBox="0 0 24 24"><path fill="currentColor" d="M4 8h13v5a6 6 0 01-6 6H10a6 6 0 01-6-6V8zm13 1h1.5a3 3 0 010 6H17v-2h1.5a1 1 0 000-2H17V9zM3 20h15v2H3v-2zM8 2h1.6c.4 1-.6 1.6-.2 3H7.8C7.4 3.6 8.4 3 8 2zm4 0h1.6c.4 1-.6 1.6-.2 3h-1.6c-.4-1.4.6-2 .2-3z"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v4h12V4H6zm1 7v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v6h2v-6h-2zm-8 4v2h2v-2H7zm4 0v2h2v-2h-2z"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path fill="currentColor" d="M9 12a5 5 0 110-10 5 5 0 010 10zm-8 9c0-4.4 3.6-7 8-7s8 2.6 8 7v1H1v-1zm18-13h2v3h3v2h-3v3h-2v-3h-3v-2h3V8z"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path fill="currentColor" d="M14.5 5l7 7-7 7-1.4-1.4 4.6-4.6H3v-2h14.7l-4.6-4.6L14.5 5z"/></symbol>
 </svg>
 
 <header class="site-header">
   <div class="container header-inner">
     <a class="logo" href="/balans-pro/" aria-label="БалансПро — на главную">
-      <span class="logo-mark">БП</span><span class="logo-text">Баланс<b>Про</b></span>
+      <svg class="logo-icon" viewBox="0 0 52 55" fill="none" aria-hidden="true"><path d="M20 4 46 4 28 24H8L20 4Z" fill="#d77f9b"/><path d="m7 33 18-20h19L27 34H7Z" fill="#f1b7ca"/><path d="m6 49 16-22h23L29 49H6Z" fill="#7a9bc3"/><path d="M26 4 16 24m15 10-11 15" stroke="white" stroke-width="2.2"/></svg>
+      <span class="logo-words"><span class="logo-text">Баланс<b>Про</b></span><small>Бухгалтерский аутсорсинг</small></span>
     </a>
 
     <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Меню">
@@ -73,33 +75,32 @@
 
     <nav id="nav" class="nav">
       <div class="nav-item has-sub">
-        <button class="nav-sub-toggle" type="button" aria-expanded="false">Бухгалтерские услуги<svg><use href="#i-chevron"/></svg></button>
+        <button class="nav-sub-toggle" type="button" aria-expanded="false">Услуги<svg><use href="#i-chevron"/></svg></button>
         <ul class="sub-menu">
-          <li><a href="/balans-pro/#services">Бухгалтерский и налоговый учёт организаций</a></li>
-          <li><a href="/balans-pro/#services">Бухгалтерия для ИП</a></li>
-          <li><a href="/balans-pro/#services">Учёт для продавцов на маркетплейсах</a></li>
-          <li><a href="/balans-pro/#services">Бухгалтерское обслуживание ООО</a></li>
-          <li><a href="/balans-pro/#services">Расчёт заработной платы</a></li>
-          <li><a href="/balans-pro/#services">Отдельные участки бухгалтерского учёта</a></li>
-          <li><a href="/balans-pro/#services">Оформление авансовых отчётов</a></li>
-        </ul>
-      </div>
-      <div class="nav-item has-sub">
-        <button class="nav-sub-toggle" type="button" aria-expanded="false">Услуги для бизнеса<svg><use href="#i-chevron"/></svg></button>
-        <ul class="sub-menu">
+          <li><a href="/balans-pro/#services">Бухгалтерский аутсорсинг</a></li>
+          <li><a href="/balans-pro/#services">Заработная плата и кадры</a></li>
+          <li><a href="/balans-pro/#services">Отчётность</a></li>
+          <li><a href="/balans-pro/#services">Регистрация и ликвидация ИП и организаций</a></li>
+          <li><a href="/balans-pro/#services">Персонифицированный учёт</a></li>
+          <li><a href="/balans-pro/#services">Консультации и сопровождение</a></li>
           <li><a href="/balans-pro/findir/">Финансовый директор на аутсорсе</a></li>
-          <li><a href="/balans-pro/#price-list">Восстановление учёта</a></li>
-          <li><a href="/balans-pro/#price-list">Сопровождение налоговых проверок</a></li>
-          <li><a href="/balans-pro/#price-list">Управленческая отчётность</a></li>
         </ul>
       </div>
-      <a href="/balans-pro/#clients">Клиенты</a>
+      <a href="/balans-pro/#industries">Отрасли</a>
+      <a href="/balans-pro/#how">Как работаем</a>
+      <a href="/balans-pro/#about">О компании</a>
       <a href="/balans-pro/#contacts">Контакты</a>
     </nav>
 
     <div class="header-actions">
-      <a class="header-phone" href="tel:+375290000000">+375 (29) 000-00-00</a>
-      <button class="btn btn--primary btn--sm" data-modal-open>Консультация</button>
+      <div class="header-call">
+        <svg><use href="#i-phone"/></svg>
+        <div>
+          <a class="header-phone" href="tel:+375291234567">+375 (29) 123-45-67</a>
+          <button class="header-callback" type="button" data-modal-open>Перезвоните мне</button>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" data-modal-open>Получить консультацию</button>
     </div>
   </div>
 </header>
@@ -125,7 +126,7 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-about">
-      <a class="logo logo--light" href="/balans-pro/"><span class="logo-mark">БП</span><span class="logo-text">Баланс<b>Про</b></span></a>
+      <a class="logo logo--light" href="/balans-pro/"><svg class="logo-icon" viewBox="0 0 52 55" fill="none" aria-hidden="true"><path d="M20 4 46 4 28 24H8L20 4Z" fill="#d77f9b"/><path d="m7 33 18-20h19L27 34H7Z" fill="#f1b7ca"/><path d="m6 49 16-22h23L29 49H6Z" fill="#7a9bc3"/><path d="M26 4 16 24m15 10-11 15" stroke="white" stroke-width="2.2"/></svg><span class="logo-words"><span class="logo-text">Баланс<b>Про</b></span><small>Бухгалтерский аутсорсинг</small></span></a>
       <p>ООО «БалансПро»<br>г. Минск, ул. Примерная, д. 1, офис 10</p>
     </div>
     <ul class="footer-links">
@@ -135,7 +136,7 @@
       <li><a href="/balans-pro/findir/">Финансовый директор на аутсорсе</a></li>
     </ul>
     <div class="footer-contacts">
-      <a class="header-phone" href="tel:+375290000000">+375 (29) 000-00-00</a>
+      <a class="header-phone" href="tel:+375291234567">+375 (29) 123-45-67</a>
       <div class="footer-messengers">
         <a class="messenger" href="https://t.me/" aria-label="Telegram"><svg><use href="#i-tg"/></svg></a>
         <a class="messenger" href="viber://chat?number=" aria-label="Viber"><svg><use href="#i-viber"/></svg></a>
@@ -152,7 +153,7 @@
 <!-- Плавающая кнопка связи -->
 <div class="fab" data-fab>
   <div class="fab-menu">
-    <a href="tel:+375290000000"><svg><use href="#i-phone"/></svg>Позвонить</a>
+    <a href="tel:+375291234567"><svg><use href="#i-phone"/></svg>Позвонить</a>
     <a href="https://t.me/"><svg><use href="#i-tg"/></svg>Telegram</a>
     <a href="viber://chat?number="><svg><use href="#i-viber"/></svg>Viber</a>
     <a href="mailto:info@balanspro.by"><svg><use href="#i-mail"/></svg>E-mail</a>

@@ -3,7 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Also started by .github/workflows/redeploy.yml in the variant-2 branch after each push there
   workflow_dispatch:
 
 permissions:
@@ -30,21 +29,6 @@ jobs:
         run: |
           mkdir _site
           cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir privacy _site/
-      # The customer's layout variant from the variant-2 branch is published at /v2/ for review.
-      # It is closed from indexing so search engines don't see two copies of the site.
-      - uses: actions/checkout@v4
-        with:
-          ref: variant-2
-          path: v2src
-      - name: Build the variant at /v2/
-        working-directory: v2src
-        run: |
-          sed -i 's#https://jmsbrn.github.io/balans-pro/#https://jmsbrn.github.io/balans-pro/v2/#g' index.html build.py
-          sed -i 's#<meta name="robots" content="index, follow, max-image-preview:large">#<meta name="robots" content="noindex, nofollow">#' index.html
-          grep -q 'content="noindex, nofollow"' index.html
-          python3 build.py
-          mkdir ../_site/v2
-          cp -r index.html styles.css script.js assets findir privacy ../_site/v2/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
