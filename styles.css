@@ -965,6 +965,8 @@ a.svc:hover .svc-go { translate: 4px 0; }
 
 /* ---------- Адаптив ---------- */
 @media (max-width: 1320px) {
+  .hero2-feats { grid-template-columns: repeat(2, auto); max-width: 460px; }
+  .hero2-feats li { max-width: 210px; }
   .nav > a, .nav-sub-toggle { padding: 9px 10px; font-size: 13px; }
 }
 
