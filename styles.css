@@ -388,7 +388,7 @@ a.svc:hover .svc-go { translate: 4px 0; }
 .worklist li::before { content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--grad); }
 
 /* ---------- Логотип с подписью ---------- */
-.logo-icon { width: 46px; height: 46px; }
+.logo-icon { width: 44px; height: 47px; }
 .logo-words { display: flex; flex-direction: column; line-height: 1.05; }
 .logo-words small { margin-top: 3px; white-space: nowrap; font-size: 9.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .logo--light .logo-words small { color: rgba(255, 255, 255, .6); }
@@ -1049,7 +1049,7 @@ a.svc:hover .svc-go { translate: 4px 0; }
 }
 
 @media (max-width: 640px) {
-  .logo-icon { width: 38px; height: 38px; }
+  .logo-icon { width: 38px; height: 41px; }
   .logo-words small { font-size: 8px; letter-spacing: .1em; }
   .hero2-photo { height: 240px; }
   .hero2 h1 { font-size: 34px; }
