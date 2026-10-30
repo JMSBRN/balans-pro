@@ -77,7 +77,7 @@
     const r = records()[state.place];
     const fields = FIELDS.filter(([k]) => r[k]);
     const rows = fields.map(([k, label], i) => `
-      <div class="rq-line" data-row="${i}" aria-selected="false">
+      <div class="rq-line" data-row="${i}">
         <dt>${label}</dt>
         <dd><span class="${k === 'account' ? 'rq-mono' : ''}">${esc(r[k])}</span>
           <button type="button" class="rq-copy" data-copy="${esc(r[k])}" aria-label="Скопировать: ${label}"><span data-label>Скопировать</span></button></dd>
@@ -91,20 +91,17 @@
         </div>
         ${r.budget ? `<span class="rq-badge">${esc(r.budget)}</span>` : ''}
       </header>
-      <p class="rq-hint">Нужны только некоторые поля? Щёлкните по строке, <kbd>Ctrl</kbd> + щелчок — добавить ещё, <kbd>Shift</kbd> + щелчок — диапазон. На телефоне просто касайтесь строк.</p>
-      <dl class="rq-lines" data-lines>${rows}</dl>
+      <p class="rq-hint">Нужно несколько полей? Нажимайте «Скопировать» с зажатым <kbd>Ctrl</kbd> — поля будут добавляться к уже скопированным. <kbd>Shift</kbd> — добавить все поля между двумя нажатиями.</p>
+      <dl class="rq-lines">${rows}</dl>
       <div class="rq-selbar" data-selbar hidden>
-        <span>Выбрано: <b data-sel-count>0</b></span>
-        <button type="button" class="btn btn--primary btn--sm" data-copy-selected><span data-label>Скопировать выбранные</span></button>
-        <button type="button" class="rq-sel-clear" data-sel-clear>Снять выделение</button>
-        <span class="rq-sel-key">или <kbd>Ctrl</kbd>+<kbd>C</kbd></span>
+        <span>✓ Скопировано полей: <b data-sel-count>0</b></span>
+        <button type="button" class="rq-sel-clear" data-sel-clear>Начать заново</button>
       </div>
       ${r.note ? `<p class="rq-note">${esc(r.note)}</p>` : ''}
       <div class="rq-actions">
         <button type="button" class="btn btn--primary btn--sm" data-copy-all><span data-label>Скопировать все реквизиты</span></button>
         <button type="button" class="btn btn--ghost btn--sm" data-copy-link><span data-label>Ссылка на эти реквизиты</span></button>
       </div>`;
-    card.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b.dataset.copy, b)));
     card.querySelector('[data-copy-all]').addEventListener('click', (e) => {
       const text = [`${t.title}${sub ? ' — ' + sub : ''}`, r.title, ...FIELDS.filter(([k]) => r[k]).map(([k, l]) => `${l}: ${r[k]}`)].filter(Boolean).join('\n');
       copy(text, e.currentTarget);
@@ -113,70 +110,68 @@
     setupSelection(fields, r);
   };
 
-  // Picking several rows: click selects one, Ctrl/Cmd toggles, Shift selects a range; touch toggles on every tap
-  let selection = { rows: new Set(), anchor: null, fields: [], record: null };
-  const coarse = window.matchMedia('(pointer: coarse)');
+  // Copy buttons: a plain click copies one field; Ctrl/Cmd+click adds the field to a set
+  // and Shift+click adds a range, the whole set going to the clipboard each time
+  let picked = { set: new Set(), anchor: null, fields: [], record: null };
 
-  const selectedText = () => {
-    const picked = [...selection.rows].sort((a, b) => a - b).map((i) => selection.fields[i]);
-    if (picked.length === 1) return selection.record[picked[0][0]];
-    return picked.map(([k, l]) => `${l}: ${selection.record[k]}`).join('\n');
+  const pickedText = () => {
+    const list = [...picked.set].sort((a, b) => a - b).map((i) => picked.fields[i]);
+    if (list.length === 1) return picked.record[list[0][0]];
+    return list.map(([k, l]) => `${l}: ${picked.record[k]}`).join('\n');
   };
 
-  const paintSelection = () => {
+  const paintPicked = () => {
     card.querySelectorAll('[data-row]').forEach((row) => {
-      const on = selection.rows.has(+row.dataset.row);
-      row.classList.toggle('is-selected', on);
-      row.setAttribute('aria-selected', String(on));
+      const on = picked.set.has(+row.dataset.row);
+      row.classList.toggle('is-picked', on);
+      const label = row.querySelector('.rq-copy [data-label]');
+      if (!row.querySelector('.rq-copy').classList.contains('is-copied')) label.textContent = on ? '✓ В наборе' : 'Скопировать';
     });
-    // floating contact buttons would cover the selection bar
-    document.body.classList.toggle('rq-selecting', selection.rows.size > 0);
+    // floating contact buttons would cover the bar
+    document.body.classList.toggle('rq-selecting', picked.set.size > 0);
     const bar = card.querySelector('[data-selbar]');
     if (!bar) return;
-    bar.hidden = selection.rows.size === 0;
-    bar.querySelector('[data-sel-count]').textContent = selection.rows.size;
-    bar.querySelector('[data-copy-selected] [data-label]').textContent =
-      selection.rows.size === 1 ? 'Скопировать значение' : 'Скопировать выбранные';
+    bar.hidden = picked.set.size < 2;
+    bar.querySelector('[data-sel-count]').textContent = picked.set.size;
   };
 
+  const resetPicked = () => { picked.set.clear(); picked.anchor = null; paintPicked(); };
+
   const setupSelection = (fields, record) => {
-    selection = { rows: new Set(), anchor: null, fields, record };
-    const lines = card.querySelector('[data-lines]');
-    // Shift+click would otherwise highlight page text
-    lines.addEventListener('mousedown', (e) => { if (e.shiftKey && !e.target.closest('.rq-copy')) e.preventDefault(); });
-    lines.addEventListener('click', (e) => {
-      const row = e.target.closest('[data-row]');
-      if (!row || e.target.closest('.rq-copy')) return;
-      if (!e.shiftKey && !e.ctrlKey && !e.metaKey && String(getSelection()).trim()) return; // let people select text by dragging
+    picked = { set: new Set(), anchor: null, fields, record };
+    card.querySelectorAll('[data-row]').forEach((row) => {
       const i = +row.dataset.row;
-      if (e.shiftKey && selection.anchor !== null) {
-        const [a, b] = [Math.min(selection.anchor, i), Math.max(selection.anchor, i)];
-        if (!(e.ctrlKey || e.metaKey)) selection.rows.clear();
-        for (let n = a; n <= b; n++) selection.rows.add(n);
-      } else if (e.ctrlKey || e.metaKey || coarse.matches) {
-        if (selection.rows.has(i)) selection.rows.delete(i); else selection.rows.add(i);
-        selection.anchor = i;
-      } else {
-        const only = selection.rows.size === 1 && selection.rows.has(i);
-        selection.rows.clear();
-        if (!only) selection.rows.add(i);
-        selection.anchor = i;
-      }
-      paintSelection();
+      const btn = row.querySelector('.rq-copy');
+      // Shift+click would otherwise highlight page text
+      btn.addEventListener('mousedown', (e) => { if (e.shiftKey) e.preventDefault(); });
+      btn.addEventListener('click', async (e) => {
+        if (e.shiftKey) {
+          const from = picked.anchor ?? i;
+          for (let n = Math.min(from, i); n <= Math.max(from, i); n++) picked.set.add(n);
+          picked.anchor = i;
+        } else if (e.ctrlKey || e.metaKey) {
+          if (picked.set.has(i)) picked.set.delete(i); else picked.set.add(i);
+          picked.anchor = i;
+        } else {
+          picked.set.clear();
+          picked.anchor = i;
+          paintPicked();
+          await copy(btn.dataset.copy, btn);
+          return;
+        }
+        paintPicked();
+        if (picked.set.size) {
+          await copy(pickedText(), btn);
+          setTimeout(paintPicked, 2050); // restore '✓ В наборе' labels after the copy flash
+        }
+      });
     });
-    card.querySelector('[data-copy-selected]').addEventListener('click', (e) => copy(selectedText(), e.currentTarget));
-    card.querySelector('[data-sel-clear]').addEventListener('click', () => { selection.rows.clear(); selection.anchor = null; paintSelection(); });
-    paintSelection();
+    card.querySelector('[data-sel-clear]').addEventListener('click', resetPicked);
+    paintPicked();
   };
 
   document.addEventListener('keydown', (e) => {
-    if (!selection.rows.size || !card.contains(document.querySelector('[data-selbar]'))) return;
-    const typing = e.target.closest('input, textarea, select, [contenteditable="true"]');
-    if (e.key === 'Escape' && !typing) { selection.rows.clear(); paintSelection(); return; }
-    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !typing && !String(getSelection()).trim()) {
-      e.preventDefault();
-      copy(selectedText(), card.querySelector('[data-copy-selected]'));
-    }
+    if (e.key === 'Escape' && picked.set.size) resetPicked();
   });
 
   const syncHash = () => {

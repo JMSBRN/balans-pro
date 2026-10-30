@@ -1041,7 +1041,8 @@ a.svc:hover .svc-go { translate: 4px 0; }
 .rq-copy:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
 .rq-copy.is-copied, .rq-copy.is-copied:hover { background: #2f9e6e; border-color: #2f9e6e; color: var(--white); }
 .rq-hint { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
-.rq-hint kbd, .rq-selbar kbd {
+@media (pointer: coarse) { .rq-hint { display: none; } }
+.rq-hint kbd {
   display: inline-block;
   padding: 1px 6px;
   border: 1px solid var(--line);
@@ -1051,11 +1052,10 @@ a.svc:hover .svc-go { translate: 4px 0; }
   font: 600 11px/1.5 var(--font);
   color: var(--ink);
 }
-.rq-line { cursor: pointer; user-select: none; transition: background .15s, box-shadow .15s; }
-.rq-line dd span { user-select: text; }
-.rq-line:hover { background: var(--white); }
-.rq-line.is-selected { background: #efe6fb; box-shadow: inset 3px 0 0 var(--accent); }
-.rq-line.is-selected dt { color: var(--accent-dark); }
+.rq-line.is-picked { background: #efe6fb; box-shadow: inset 3px 0 0 var(--accent); }
+.rq-copy { user-select: none; }
+.rq-line.is-picked .rq-copy { background: var(--accent); border-color: var(--accent); color: var(--white); }
+.rq-line .rq-copy.is-copied { background: #2f9e6e; border-color: #2f9e6e; color: var(--white); }
 .rq-selbar {
   position: sticky;
   bottom: 12px;
@@ -1073,17 +1073,12 @@ a.svc:hover .svc-go { translate: 4px 0; }
   font-size: 14px;
 }
 .rq-selbar[hidden] { display: none; }
-.rq-selbar .btn.is-copied { background: #2f9e6e; box-shadow: none; }
 .rq-sel-clear { padding: 0; border: 0; background: none; font-size: 13px; color: rgba(255, 255, 255, .75); text-decoration: underline; text-underline-offset: 2px; }
 .rq-sel-clear:hover { color: var(--white); }
-.rq-sel-key { margin-left: auto; font-size: 12px; color: rgba(255, 255, 255, .6); }
-.rq-selbar .rq-sel-key kbd { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .25); color: var(--white); }
-@media (pointer: coarse) { .rq-sel-key { display: none; } }
 .rq-selecting .fab-label { display: none; }
 @media (max-width: 640px) {
   .rq-selecting .fab, .rq-selecting .to-top { display: none; }
   .rq-selbar { gap: 8px 12px; }
-  .rq-selbar .btn { order: 3; width: 100%; }
 }
 .rq-note { margin-top: 12px; font-size: 13px; color: var(--muted); }
 .rq-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
