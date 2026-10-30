@@ -1,0 +1,34 @@
+  <!-- Актуальные показатели. Карточки строит build.py из assets/data/pokazateli.json, обновление — tools/update_pokazateli.py -->
+  <section class="section rq-hero">
+    <div class="container">
+      <nav class="crumbs" aria-label="Навигация"><a href="">Главная</a><span>/</span>Актуальная информация</nav>
+      <span class="tag">Справочник</span>
+      <h1>Актуальные показатели <em>для бухгалтера</em></h1>
+      <p class="rq-lead">Базовая величина, МЗП, БПМ, базовая арендная величина, ставка рефинансирования и основные ставки налогов Беларуси — в одном месте и с датами, с которых они действуют.</p>
+    </div>
+  </section>
+
+  <section class="section section--tight" id="pokazateli">
+    <div class="container">
+      <div class="kpi-grid">
+{{INDICATORS}}
+      </div>
+      <p class="rq-source">Данные сверены {{CHECKED}}. Базовая величина, БАВ, БПМ и ставка рефинансирования обновляются автоматически раз в сутки по справочникам «Бизнес-Инфо» и данным Национального банка. Перед важными расчётами сверьтесь с первоисточником или спросите нас.</p>
+    </div>
+  </section>
+
+  <section class="section section--soft" id="nalogi">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <span class="tag">Справочно</span>
+          <h2>Основные <em>ставки налогов</em></h2>
+        </div>
+        <p>Ставки по Налоговому кодексу на {{TAX_YEAR}} год. Для отдельных видов деятельности и операций действуют особые ставки и льготы — уточните у нас, что применимо к вашему бизнесу.</p>
+      </div>
+      <div class="tax-grid">
+{{TAXES}}
+      </div>
+    </div>
+  </section>
+

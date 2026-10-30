@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Daily rebuild picks up new indicator values (06:17 in Minsk)
+  schedule:
+    - cron: '17 3 * * *'
 
 permissions:
   contents: read
@@ -22,16 +25,27 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # Never fails the deploy: an unreachable source keeps the last known value
+      - name: Refresh indicator values
+        run: python3 tools/update_pokazateli.py
       - name: Build inner pages, sitemap and robots.txt
         run: python3 build.py
       # Only the site itself is published: sources in _src/, build.py and README stay out of reach of crawlers
       - name: Collect site files
         run: |
           mkdir _site
-          cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir rekvizity privacy _site/
+          cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir rekvizity pokazateli privacy _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Fails (and GitHub e-mails the owner) once a hand-kept value in assets/data/pokazateli.json is due for review
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check hand-kept indicators
+        run: python3 tools/update_pokazateli.py --check

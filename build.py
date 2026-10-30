@@ -52,6 +52,16 @@ PAGES = [
         'schema': {'@type': 'WebPage', 'name': 'Реквизиты для уплаты налогов в Минске и Минской области'},
     },
     {
+        'slug': 'pokazateli',
+        'title': 'Базовая величина, МЗП, БПМ и ставки налогов в Беларуси — актуальные показатели | БалансПро',
+        'description': 'Актуальные показатели для бухгалтера: базовая величина, минимальная зарплата, БПМ, базовая арендная '
+                       'величина, ставка рефинансирования, пособие до 3 лет и основные ставки налогов Беларуси.',
+        'local': {'#pokazateli', '#nalogi'},
+        'contacts': True,
+        'priority': '0.8',
+        'schema': {'@type': 'WebPage', 'name': 'Актуальные показатели для бухгалтера'},
+    },
+    {
         'slug': 'privacy',
         'title': 'Политика обработки персональных данных | БалансПро',
         'description': 'Как БалансПро собирает, использует и защищает персональные данные, которые вы оставляете на сайте.',
@@ -61,6 +71,60 @@ PAGES = [
         'schema': {'@type': 'WebPage', 'name': 'Политика обработки персональных данных'},
     },
 ]
+
+
+MONTHS = ('января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября',
+          'ноября', 'декабря')
+
+
+def esc(text):
+    return str(text).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
+
+def money(value):
+    """45 -> '45', 1057.7 -> '1 057,70'"""
+    whole, frac = f'{value:.2f}'.split('.')
+    whole = f'{int(whole):,}'.replace(',', '\u00a0')
+    return whole if frac == '00' else f'{whole},{frac}'
+
+
+def ddmmyyyy(iso):
+    y, m, d = iso.split('-')
+    return f'{d}.{m}.{y}'
+
+
+def render_pokazateli(text):
+    """Fills the indicators page from assets/data/pokazateli.json."""
+    data = json.loads((root / 'assets' / 'data' / 'pokazateli.json').read_text(encoding='utf-8'))
+    cards = []
+    for i in data['indicators']:
+        if 'value2' in i:
+            value = ''.join(f'<p class="kpi-value kpi-value--pair">{money(v)} <span>{esc(i["unit"])}</span>'
+                            f'<small>{esc(label)}</small></p>'
+                            for v, label in zip((i['value'], i['value2']), i['labels']))
+        else:
+            value = f'<p class="kpi-value">{money(i["value"])} <span>{esc(i["unit"])}</span></p>'
+        period = f'С {ddmmyyyy(i["since"])}' + (f' по {ddmmyyyy(i["until"])}' if i.get('until') else '')
+        cards.append(f'''        <article class="kpi-card" id="{i["id"]}">
+          <span class="kpi-abbr">{esc(i["abbr"])}</span>
+          <h2>{esc(i["title"])}</h2>
+          {value}
+          <p class="kpi-note">{esc(i["note"])}</p>
+          <p class="kpi-meta"><span>{period}</span><a href="{esc(i["source"])}" target="_blank" rel="noopener">Источник</a></p>
+        </article>''')
+    taxes = []
+    for t in data['taxes']:
+        rates = ''.join(f'<li><b>{esc(r)}</b><span>{esc(d)}</span></li>' for r, d in t['rates'])
+        taxes.append(f'        <article class="tax-card">\n          <h3>{esc(t["title"])}</h3>\n'
+                     f'          <ul>{rates}</ul>\n        </article>')
+    y, m, d = data['checked'].split('-')
+    return (text.replace('{{INDICATORS}}', '\n'.join(cards))
+                .replace('{{TAXES}}', '\n'.join(taxes))
+                .replace('{{CHECKED}}', f'{int(d)} {MONTHS[int(m) - 1]} {y}')
+                .replace('{{TAX_YEAR}}', str(int(data['taxes_review_by'][:4]) - 1)))
+
+
+RENDER = {'pokazateli': render_pokazateli}
 
 
 def cut(start, end):
@@ -157,7 +221,8 @@ for cfg in PAGES:
     head = make_head(cfg['title'], cfg['description'], url, schema, '../')
     local = cfg['local'] | ({'#contacts'} if cfg['contacts'] else set())
     # _src pages are written with links relative to the site root, like index.html
-    content = relink((root / '_src' / f'{cfg["slug"]}.html').read_text(encoding='utf-8'), '../', local)
+    content = (root / '_src' / f'{cfg["slug"]}.html').read_text(encoding='utf-8')
+    content = relink(RENDER.get(cfg['slug'], str)(content), '../', local)
     out = root / cfg['slug'] / 'index.html'
     out.parent.mkdir(exist_ok=True)
     out.write_text(assemble(head, '../', content, local, cfg['contacts']), encoding='utf-8')

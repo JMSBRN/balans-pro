@@ -1306,3 +1306,29 @@ a.svc:hover .svc-go { translate: 4px 0; }
   .fab { right: 16px; bottom: 16px; }
   .to-top { left: 16px; bottom: 16px; }
 }
+
+/* Актуальные показатели */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.kpi-card { display: flex; flex-direction: column; padding: 24px; border-radius: var(--petal); background: var(--white); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm); scroll-margin-top: 100px; }
+.kpi-abbr { align-self: flex-start; margin-bottom: 12px; padding: 4px 12px; border-radius: 999px; background: var(--soft); font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--accent); }
+.kpi-card h2 { margin-bottom: 10px; font-size: 17px; font-weight: 700; line-height: 1.35; }
+.kpi-value { margin-bottom: 10px; font-size: 34px; font-weight: 800; line-height: 1.15; color: var(--ink); }
+.kpi-value span { font-size: 16px; font-weight: 600; color: var(--muted); }
+.kpi-value--pair { margin-bottom: 6px; font-size: 26px; }
+.kpi-value--pair span { font-size: 14px; }
+.kpi-value small { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.kpi-note { flex: 1; margin-bottom: 16px; font-size: 14px; line-height: 1.5; color: var(--text); }
+.kpi-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--muted); }
+.kpi-meta a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.tax-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tax-card { padding: 24px; border-radius: var(--petal); background: var(--white); box-shadow: var(--shadow-sm); }
+.tax-card h3 { margin-bottom: 14px; font-size: 17px; font-weight: 700; }
+.tax-card ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.tax-card li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 14px; line-height: 1.45; }
+.tax-card b { font-size: 20px; font-weight: 800; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (max-width: 1100px) { .kpi-grid, .tax-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .kpi-grid, .tax-grid { grid-template-columns: 1fr; }
+  .kpi-card, .tax-card { padding: 20px; }
+  .kpi-value { font-size: 30px; }
+}

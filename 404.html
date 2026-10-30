@@ -27,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/balans-pro/styles.css?v=14">
+  <link rel="stylesheet" href="/balans-pro/styles.css?v=17">
 
 </head>
 <body>
@@ -89,7 +89,13 @@
       <a href="/balans-pro/#industries">Отрасли</a>
       <a href="/balans-pro/#how">Как работаем</a>
       <a href="/balans-pro/#about">О компании</a>
-      <a href="/balans-pro/rekvizity/">Реквизиты платежей</a>
+      <div class="nav-item has-sub">
+        <button class="nav-sub-toggle" type="button" aria-expanded="false">Справочник<svg><use href="#i-chevron"/></svg></button>
+        <ul class="sub-menu">
+          <li><a href="/balans-pro/rekvizity/">Реквизиты платежей</a></li>
+          <li><a href="/balans-pro/pokazateli/">Актуальная информация</a></li>
+        </ul>
+      </div>
       <a href="/balans-pro/#contacts">Контакты</a>
     </nav>
 
@@ -130,6 +136,7 @@
       <li><a href="/balans-pro/#services">Расчёт заработной платы</a></li>
       <li><a href="/balans-pro/findir/">Финансовый директор на аутсорсе</a></li>
       <li><a href="/balans-pro/rekvizity/">Реквизиты для уплаты налогов</a></li>
+      <li><a href="/balans-pro/pokazateli/">Актуальные показатели</a></li>
     </ul>
     <div class="footer-contacts">
       <a class="header-phone" href="tel:+375291234567">+375 (29) 123-45-67</a>
