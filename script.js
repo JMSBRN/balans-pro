@@ -168,7 +168,7 @@ document.addEventListener('click', (e) => {
 
 // Forms go to Telegram through a Google Apps Script web app (tools/telegram-form.gs),
 // which keeps the bot token out of the site code. Paste the web app URL here.
-const FORM_ENDPOINT = '';
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzm-iBhFTimrY7GBatc1zOmu_CwnUCYm7hoh7avEzT_3vsloBmOfe0hlMdW3xhhaQSh/exec';
 
 document.querySelectorAll('[data-form]').forEach((form) => {
   const status = form.querySelector('.form-status');
