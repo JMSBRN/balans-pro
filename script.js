@@ -207,6 +207,8 @@ document.querySelectorAll('[data-form]').forEach((form) => {
     const data = new URLSearchParams(new FormData(form));
     data.set('form', form.querySelector('h2')?.textContent.trim() || '');
     data.set('page', location.href);
+    // Pages for a separate specialist mark their requests (findir: the CFO)
+    data.set('topic', document.querySelector('main')?.dataset.topic || 'Бухгалтерия');
     const button = form.querySelector('[type="submit"]');
     button.disabled = true;
     status.textContent = 'Отправляем…';

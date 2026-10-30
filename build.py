@@ -24,6 +24,8 @@ page = (root / 'index.html').read_text(encoding='utf-8')
 PAGES = [
     {
         'slug': 'findir',
+        # Requests from this page go to the CFO, not the accountant: the forms send this as the topic
+        'topic': 'Финансовый директор',
         'title': 'Финансовый директор на аутсорсе в Минске | БалансПро',
         'description': 'Финансовый директор на аутсорсе в Минске: управленческая отчётность, финансовая модель, '
                        'контроль денежных потоков и расходов, защита от кассовых разрывов.',
@@ -192,16 +194,17 @@ footer_src = cut('<footer class="site-footer">', '</footer>')
 tail_src = cut('<!-- Плавающая кнопка связи -->', '</html>')
 
 
-def assemble(head, prefix, content, local, contacts):
+def assemble(head, prefix, content, local, contacts, topic=None):
     header, footer, tail = (relink(part, prefix, local) for part in (header_src, footer_src, tail_src))
     body_contacts = relink(contacts_src, prefix, local) if contacts else ''
+    topic_attr = f' data-topic="{topic}"' if topic else ''
     return f'''{head}
 <body>
 
 {sprite}
 {header}
 
-<main id="top">
+<main id="top"{topic_attr}>
 
 {content}{body_contacts}
 
@@ -225,7 +228,7 @@ for cfg in PAGES:
     content = relink(RENDER.get(cfg['slug'], str)(content), '../', local)
     out = root / cfg['slug'] / 'index.html'
     out.parent.mkdir(exist_ok=True)
-    out.write_text(assemble(head, '../', content, local, cfg['contacts']), encoding='utf-8')
+    out.write_text(assemble(head, '../', content, local, cfg['contacts'], cfg.get('topic')), encoding='utf-8')
     print(f'{cfg["slug"]}/index.html written')
 
 # 404 is served from any depth, so every link is absolute from the site root

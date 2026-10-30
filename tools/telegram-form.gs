@@ -11,6 +11,10 @@
  *  6. Deploy → New deployment → Web app: Execute as «Me», Who has access «Anyone».
  *     Put the web app URL into FORM_ENDPOINT in script.js.
  *
+ * Separate specialist (optional): requests from the CFO page arrive marked «Финансовый директор».
+ * To also send them straight to the CFO, they open the bot and press Start, then select
+ * setupFindir and press Run.
+ *
  * Google Sheets log (optional): select setupSheet and press Run once. It creates the
  * «Заявки с сайта БалансПро» spreadsheet in your Drive and logs its link; every request is
  * then added as a row. After changing this code: Deploy → Manage deployments → edit →
@@ -18,22 +22,35 @@
  */
 
 const MAX_PER_HOUR = 30; // a cap against form spam
-const LIMITS = { name: 100, phone: 40, email: 120, message: 2000, form: 60, page: 300 };
+const LIMITS = { name: 100, phone: 40, email: 120, message: 2000, form: 60, page: 300, topic: 40 };
+const DEFAULT_TOPIC = 'Бухгалтерия';
+const FINDIR_TOPIC = 'Финансовый директор';
 
 function setup() {
-  const props = PropertiesService.getScriptProperties();
-  const token = props.getProperty('TELEGRAM_TOKEN');
-  if (!token) throw new Error('Add the TELEGRAM_TOKEN script property first');
-  const res = JSON.parse(UrlFetchApp.fetch(`https://api.telegram.org/bot${token}/getUpdates`).getContentText());
-  const chats = (res.result || []).map((u) => (u.message || u.my_chat_member || {}).chat).filter(Boolean);
-  if (!chats.length) throw new Error('No messages yet: open the bot in Telegram, press Start and run setup again');
-  const chat = chats[chats.length - 1];
-  props.setProperty('TELEGRAM_CHAT_ID', String(chat.id));
+  const chat = latestChat_();
+  PropertiesService.getScriptProperties().setProperty('TELEGRAM_CHAT_ID', String(chat.id));
   send_(`✅ Заявки с сайта БалансПро будут приходить сюда.`);
   Logger.log(`Chat saved: ${chat.id} (${chat.first_name || chat.title || ''})`);
 }
 
-const HEADERS = ['Дата и время', 'Форма', 'Имя', 'Телефон', 'E-mail', 'Сообщение', 'Страница', 'Статус'];
+// The CFO's chat: they press Start in the bot, then this is run once
+function setupFindir() {
+  const chat = latestChat_();
+  PropertiesService.getScriptProperties().setProperty('FINDIR_CHAT_ID', String(chat.id));
+  send_(`✅ Заявки со страницы «${FINDIR_TOPIC}» будут приходить сюда.`, String(chat.id));
+  Logger.log(`CFO chat saved: ${chat.id} (${chat.first_name || chat.title || ''})`);
+}
+
+function latestChat_() {
+  const token = PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN');
+  if (!token) throw new Error('Add the TELEGRAM_TOKEN script property first');
+  const res = JSON.parse(UrlFetchApp.fetch(`https://api.telegram.org/bot${token}/getUpdates`).getContentText());
+  const chats = (res.result || []).map((u) => (u.message || u.my_chat_member || {}).chat).filter(Boolean);
+  if (!chats.length) throw new Error('No messages yet: open the bot in Telegram, press Start and run this again');
+  return chats[chats.length - 1];
+}
+
+const HEADERS = ['Дата и время', 'Направление', 'Форма', 'Имя', 'Телефон', 'E-mail', 'Сообщение', 'Страница', 'Статус'];
 
 const STATUSES = ['Новая', 'В работе', 'Клиент', 'Отказ'];
 
@@ -50,8 +67,8 @@ function setupSheet() {
   sheet.setFrozenRows(1);
   sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#efe6fb');
   sheet.getRange('A:A').setNumberFormat('dd.mm.yyyy hh:mm');
-  sheet.getRange('H2:H').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(STATUSES).build());
-  [140, 140, 160, 150, 200, 320, 260, 120].forEach((w, i) => sheet.setColumnWidth(i + 1, w));
+  sheet.getRange('I2:I').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(STATUSES).build());
+  [140, 170, 140, 160, 150, 200, 320, 260, 120].forEach((w, i) => sheet.setColumnWidth(i + 1, w));
   props.setProperty('SHEET_ID', book.getId());
   Logger.log(`Spreadsheet: ${book.getUrl()}`);
 }
@@ -71,6 +88,7 @@ function doPost(e) {
   cache.put('count', String(count + 1), 3600);
 
   const lead = {
+    topic: clean('topic') || DEFAULT_TOPIC,
     form: clean('form'), name, phone, email: clean('email'), message: clean('message'), page: clean('page'),
   };
   // Each channel on its own: a Sheets hiccup must not lose the Telegram message, and back
@@ -94,15 +112,24 @@ function save_(lead) {
   if (!id) return false;
   // A leading = + - @ would make Sheets treat the text as a formula
   const text = (v) => (/^[=+\-@]/.test(v) ? `'${v}` : v);
-  SpreadsheetApp.openById(id).getSheetByName('Заявки').appendRow([
-    new Date(), lead.form, text(lead.name), text(lead.phone), text(lead.email), text(lead.message), lead.page, STATUSES[0],
+  const sheet = SpreadsheetApp.openById(id).getSheetByName('Заявки');
+  // Sheets made before the topic column existed get it inserted after the date
+  if (sheet.getRange(1, 2).getValue() !== HEADERS[1]) {
+    sheet.insertColumnBefore(2);
+    sheet.getRange(1, 2).setValue(HEADERS[1]).setFontWeight('bold').setBackground('#efe6fb');
+    sheet.setColumnWidth(2, 170);
+  }
+  sheet.appendRow([
+    new Date(), lead.topic, lead.form, text(lead.name), text(lead.phone), text(lead.email), text(lead.message), lead.page, STATUSES[0],
   ]);
   return true;
 }
 
-function notify_({ form, name, phone, email, message, page }) {
+function notify_({ topic, form, name, phone, email, message, page }) {
+  const findir = topic === FINDIR_TOPIC;
   const lines = [
-    '📩 <b>Новая заявка с сайта</b>' + (form ? ` — ${esc_(form)}` : ''),
+    (findir ? '💼' : '📩') + ` <b>${esc_(topic.toUpperCase())}</b> — новая заявка с сайта`,
+    form ? `<i>${esc_(form)}</i>` : '',
     '',
     `<b>Имя:</b> ${esc_(name)}`,
     `<b>Телефон:</b> ${esc_(phone)}`,
@@ -110,16 +137,20 @@ function notify_({ form, name, phone, email, message, page }) {
   if (email) lines.push(`<b>E-mail:</b> ${esc_(email)}`);
   if (message) lines.push('', esc_(message));
   if (page) lines.push('', `<i>${esc_(page)}</i>`);
-  send_(lines.join('\n'));
+  const text = lines.filter((l, i) => l || i !== 1).join('\n');
+  send_(text);
+  // The CFO gets their requests directly too, when their chat is set up
+  const cfo = PropertiesService.getScriptProperties().getProperty('FINDIR_CHAT_ID');
+  if (findir && cfo && cfo !== PropertiesService.getScriptProperties().getProperty('TELEGRAM_CHAT_ID')) send_(text, cfo);
 }
 
-function send_(text) {
+function send_(text, chatId) {
   const props = PropertiesService.getScriptProperties();
   UrlFetchApp.fetch(`https://api.telegram.org/bot${props.getProperty('TELEGRAM_TOKEN')}/sendMessage`, {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify({
-      chat_id: props.getProperty('TELEGRAM_CHAT_ID'),
+      chat_id: chatId || props.getProperty('TELEGRAM_CHAT_ID'),
       text,
       parse_mode: 'HTML',
       disable_web_page_preview: true,
