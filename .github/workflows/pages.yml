@@ -28,7 +28,7 @@ jobs:
       - name: Collect site files
         run: |
           mkdir _site
-          cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir privacy _site/
+          cp -r index.html 404.html styles.css script.js robots.txt sitemap.xml .nojekyll assets findir rekvizity privacy _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

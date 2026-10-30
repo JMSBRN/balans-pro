@@ -1,0 +1,123 @@
+  <!-- Справочник реквизитов. Данные: assets/data/rekvizity.json, как обновить — в tools/ketuta_to_site.py -->
+  <section class="section rq-hero">
+    <div class="container">
+      <nav class="crumbs" aria-label="Навигация"><a href="">Главная</a><span>/</span>Реквизиты для уплаты налогов</nav>
+      <span class="tag">Справочник</span>
+      <h1>Реквизиты для уплаты налогов <em>в&nbsp;Минске и&nbsp;Минской области</em></h1>
+      <p class="rq-lead">Выберите налог и свою инспекцию — получите готовые реквизиты для платёжного поручения: счёт, БИК, УНП бенефициара, код платежа и очерёдность. Каждое поле можно скопировать в&nbsp;один клик.</p>
+    </div>
+  </section>
+
+  <section class="section section--tight rq-app-section" id="spravochnik">
+    <div class="container">
+      <div class="rq-app" data-rq>
+        <div class="rq-step">
+          <span class="rq-step-num">1</span>
+          <h2>Что платите</h2>
+        </div>
+        <div class="rq-taxes" role="tablist" aria-label="Вид платежа" data-rq-taxes>
+          <button type="button" class="rq-tax" disabled>Загружаем справочник…</button>
+        </div>
+
+        <div class="rq-row">
+          <label class="rq-field" data-rq-group-wrap hidden>
+            <span>Вид ввоза</span>
+            <select data-rq-group></select>
+          </label>
+          <label class="rq-field" data-rq-place-wrap>
+            <span><b class="rq-step-num rq-step-num--sm">2</b>Ваша инспекция или отдел</span>
+            <select data-rq-place></select>
+          </label>
+        </div>
+
+        <article class="rq-card" data-rq-card aria-live="polite">
+          <noscript>
+            <p>Справочник работает с включённым JavaScript. Реквизиты также опубликованы на <a href="https://nalog.gov.by/inspectorates/payment_details/">сайте МНС</a> и <a href="https://www.minfin.gov.by/ru/budget_execution/table2024/">сайте Минфина</a>.</p>
+          </noscript>
+        </article>
+
+        <p class="rq-source" data-rq-source>
+          Данные сверены <span data-rq-checked>…</span>. Реквизиты бюджета иногда меняются — перед крупным платежом сверьте их на&nbsp;<a href="https://nalog.gov.by/inspectorates/payment_details/" target="_blank" rel="noopener">сайте МНС</a> или <a href="https://www.minfin.gov.by/ru/budget_execution/table2024/" target="_blank" rel="noopener">сайте Минфина</a>, либо спросите нас.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Описания платежей: текст для читателей и поисковиков -->
+  <section class="section section--soft" id="vidy">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <span class="tag">Что есть в справочнике</span>
+          <h2>Реквизиты для <em>16 видов</em> платежей</h2>
+        </div>
+        <p>По каждой инспекции МНС и отделу ФСЗН Минска и Минской области — отдельные реквизиты. Нажмите на платёж, чтобы открыть его в справочнике.</p>
+      </div>
+      <div class="rq-list">
+        <a class="rq-item" href="#pribyl"><h3>Налог на прибыль</h3><p>Код платежа 00202, местный бюджет. Для организаций на общей системе налогообложения.</p></a>
+        <a class="rq-item" href="#nds"><h3>НДС</h3><p>Код платежа 01001, республиканский бюджет. НДС по оборотам на территории Беларуси.</p></a>
+        <a class="rq-item" href="#nds-vvoz"><h3>НДС при ввозе товаров</h3><p>Отдельные коды для ввоза из России, Армении, Кыргызстана, Казахстана, для строительства БелАЭС и для услуг передачи данных.</p></a>
+        <a class="rq-item" href="#usn"><h3>Налог при УСН</h3><p>Код платежа 01201, местный бюджет. Для организаций и ИП на упрощённой системе.</p></a>
+        <a class="rq-item" href="#edinyj"><h3>Единый налог с ИП и физлиц</h3><p>Код платежа 01202, местный бюджет.</p></a>
+        <a class="rq-item" href="#podohodny"><h3>Подоходный налог за работников</h3><p>Код платежа 00101. Удерживается нанимателем из зарплаты.</p></a>
+        <a class="rq-item" href="#podohodny-ip"><h3>Подоходный налог ИП за себя</h3><p>Код платежа 00102. Для ИП на общей системе налогообложения.</p></a>
+        <a class="rq-item" href="#dohody"><h3>Налог на доходы</h3><p>Код платежа 00303, категория перевода WHLD.</p></a>
+        <a class="rq-item" href="#nedvizhimost"><h3>Налог на недвижимость организаций</h3><p>Код платежа 00901.</p></a>
+        <a class="rq-item" href="#transport"><h3>Транспортный налог организаций</h3><p>Код платежа 03113, республиканский бюджет.</p></a>
+        <a class="rq-item" href="#reklama"><h3>Сбор за распространение рекламы</h3><p>Код платежа 01904, республиканский бюджет.</p></a>
+        <a class="rq-item" href="#fszn"><h3>ФСЗН за работников</h3><p>Код платежа 03511, код назначения 90102. Реквизиты районных отделов ФСЗН.</p></a>
+        <a class="rq-item" href="#fszn-ip"><h3>ФСЗН ИП за себя</h3><p>Код платежа 03512, код назначения 90102.</p></a>
+        <a class="rq-item" href="#belgosstrakh"><h3>Белгосстрах</h3><p>Обязательное страхование от несчастных случаев на производстве: филиалы по Минску и области.</p></a>
+        <a class="rq-item" href="#vtorresursy"><h3>Оператор вторичных ресурсов</h3><p>Реквизиты ГУ «Оператор вторичных материальных ресурсов».</p></a>
+        <a class="rq-item" href="#kody-zp"><h3>Коды для выплат без налогов</h3><p>Коды назначения платежа для выплат физлицам: алименты, договоры подряда, стипендии и другие.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Вопросы и ответы -->
+  <section class="section" id="faq">
+    <div class="container rq-faq">
+      <div>
+        <span class="tag">Вопросы</span>
+        <h2>Как заполнить <em>платёжное поручение</em></h2>
+        <p class="rq-faq-lead">Короткие ответы на вопросы, которые чаще всего возникают при уплате налогов.</p>
+      </div>
+      <div class="rq-faq-list">
+        <details>
+          <summary>Что такое бенефициар и фактический бенефициар?</summary>
+          <p>С 10 мая 2024 года в платёжном поручении на уплату налогов указывают два получателя. Бенефициар — главное управление Министерства финансов по региону, на счёт которого поступают деньги. Фактический бенефициар — инспекция МНС или финансовый отдел, за которым закреплён платёж. У каждого указывают УНП и наименование.</p>
+        </details>
+        <details>
+          <summary>Какую очерёдность платежа указывать?</summary>
+          <p>Для налогов и взносов в ФСЗН в справочнике указана очерёдность 13, для платежей в Белгосстрах — 21.</p>
+        </details>
+        <details>
+          <summary>Что указать в категории перевода?</summary>
+          <p>Для большинства налогов — TAXS. Для НДС при ввозе товаров — VATX, для налога на доходы — WHLD, для Белгосстраха и выплат физлицам — OTHR. Нужное значение показано в карточке каждого платежа.</p>
+        </details>
+        <details>
+          <summary>Как узнать свою инспекцию?</summary>
+          <p>Инспекция определяется по месту постановки на учёт организации или ИП. Её можно посмотреть в свидетельстве о регистрации или в личном кабинете плательщика на портале МНС.</p>
+        </details>
+        <details>
+          <summary>Можно ли поручить уплату налогов вам?</summary>
+          <p>Да. Мы рассчитаем налоги, подготовим платёжные поручения и проследим, чтобы всё ушло в срок. <a href="#contacts">Оставьте заявку</a> — проконсультируем бесплатно.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Что такое бенефициар и фактический бенефициар?", "acceptedAnswer": { "@type": "Answer", "text": "С 10 мая 2024 года в платёжном поручении на уплату налогов указывают два получателя. Бенефициар — главное управление Министерства финансов по региону, на счёт которого поступают деньги. Фактический бенефициар — инспекция МНС или финансовый отдел, за которым закреплён платёж." } },
+      { "@type": "Question", "name": "Какую очерёдность платежа указывать?", "acceptedAnswer": { "@type": "Answer", "text": "Для налогов и взносов в ФСЗН — очерёдность 13, для платежей в Белгосстрах — 21." } },
+      { "@type": "Question", "name": "Что указать в категории перевода?", "acceptedAnswer": { "@type": "Answer", "text": "Для большинства налогов — TAXS. Для НДС при ввозе товаров — VATX, для налога на доходы — WHLD, для Белгосстраха и выплат физлицам — OTHR." } },
+      { "@type": "Question", "name": "Как узнать свою инспекцию?", "acceptedAnswer": { "@type": "Answer", "text": "Инспекция определяется по месту постановки на учёт организации или ИП. Её можно посмотреть в свидетельстве о регистрации или в личном кабинете плательщика на портале МНС." } }
+    ]
+  }
+  </script>
+  <script src="assets/rekvizity.js" defer></script>
+

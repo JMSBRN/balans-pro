@@ -40,6 +40,18 @@ PAGES = [
         },
     },
     {
+        'slug': 'rekvizity',
+        'title': 'Реквизиты для уплаты налогов в Минске и Минской области | БалансПро',
+        'description': 'Реквизиты для уплаты налогов, ФСЗН и Белгосстраха по инспекциям Минска и Минской области: '
+                       'счёт, БИК, УНП бенефициара, код платежа. Копирование в один клик.',
+        'local': {'#spravochnik', '#vidy', '#faq', '#pribyl', '#nedvizhimost', '#transport', '#nds', '#nds-vvoz',
+                  '#podohodny', '#podohodny-ip', '#dohody', '#usn', '#edinyj', '#reklama', '#fszn', '#fszn-ip',
+                  '#belgosstrakh', '#vtorresursy', '#kody-zp'},
+        'contacts': True,
+        'priority': '0.9',
+        'schema': {'@type': 'WebPage', 'name': 'Реквизиты для уплаты налогов в Минске и Минской области'},
+    },
+    {
         'slug': 'privacy',
         'title': 'Политика обработки персональных данных | БалансПро',
         'description': 'Как БалансПро собирает, использует и защищает персональные данные, которые вы оставляете на сайте.',
