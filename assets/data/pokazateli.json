@@ -67,7 +67,7 @@
       "title": "Ставка рефинансирования Нацбанка",
       "value": 9.25,
       "unit": "%",
-      "since": "2026-05-18",
+      "since": "2026-06-01",
       "note": "Используется при расчёте пени и процентов по обязательствам.",
       "source": "https://www.nbrb.by/statistics/monetarypolicyinstruments/refinancingrate",
       "auto": true
