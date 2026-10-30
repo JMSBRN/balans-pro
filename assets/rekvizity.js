@@ -49,11 +49,11 @@
     btn.classList.add('is-copied');
     const label = btn.querySelector('[data-label]');
     const prev = label ? label.textContent : null;
-    if (label) label.textContent = 'Скопировано';
+    if (label) label.textContent = '✓ Скопировано';
     setTimeout(() => {
       btn.classList.remove('is-copied');
       if (label) label.textContent = prev;
-    }, 1600);
+    }, 2000);
   };
 
   const fillPlaces = () => {
@@ -79,7 +79,7 @@
       <div class="rq-line">
         <dt>${label}</dt>
         <dd><span class="${k === 'account' ? 'rq-mono' : ''}">${esc(r[k])}</span>
-          <button type="button" class="rq-copy" data-copy="${esc(r[k])}" aria-label="Скопировать: ${label}"><svg><use href="#i-doc"/></svg></button></dd>
+          <button type="button" class="rq-copy" data-copy="${esc(r[k])}" aria-label="Скопировать: ${label}"><span data-label>Скопировать</span></button></dd>
       </div>`).join('');
     const sub = t.groups ? t.groups[state.group].title : '';
     card.innerHTML = `
