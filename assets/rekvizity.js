@@ -75,8 +75,9 @@
       return;
     }
     const r = records()[state.place];
-    const rows = FIELDS.filter(([k]) => r[k]).map(([k, label]) => `
-      <div class="rq-line">
+    const fields = FIELDS.filter(([k]) => r[k]);
+    const rows = fields.map(([k, label], i) => `
+      <div class="rq-line" data-row="${i}" aria-selected="false">
         <dt>${label}</dt>
         <dd><span class="${k === 'account' ? 'rq-mono' : ''}">${esc(r[k])}</span>
           <button type="button" class="rq-copy" data-copy="${esc(r[k])}" aria-label="Скопировать: ${label}"><span data-label>Скопировать</span></button></dd>
@@ -90,7 +91,14 @@
         </div>
         ${r.budget ? `<span class="rq-badge">${esc(r.budget)}</span>` : ''}
       </header>
-      <dl class="rq-lines">${rows}</dl>
+      <p class="rq-hint">Нужны только некоторые поля? Щёлкните по строке, <kbd>Ctrl</kbd> + щелчок — добавить ещё, <kbd>Shift</kbd> + щелчок — диапазон. На телефоне просто касайтесь строк.</p>
+      <dl class="rq-lines" data-lines>${rows}</dl>
+      <div class="rq-selbar" data-selbar hidden>
+        <span>Выбрано: <b data-sel-count>0</b></span>
+        <button type="button" class="btn btn--primary btn--sm" data-copy-selected><span data-label>Скопировать выбранные</span></button>
+        <button type="button" class="rq-sel-clear" data-sel-clear>Снять выделение</button>
+        <span class="rq-sel-key">или <kbd>Ctrl</kbd>+<kbd>C</kbd></span>
+      </div>
       ${r.note ? `<p class="rq-note">${esc(r.note)}</p>` : ''}
       <div class="rq-actions">
         <button type="button" class="btn btn--primary btn--sm" data-copy-all><span data-label>Скопировать все реквизиты</span></button>
@@ -102,7 +110,74 @@
       copy(text, e.currentTarget);
     });
     card.querySelector('[data-copy-link]').addEventListener('click', (e) => copy(location.href, e.currentTarget));
+    setupSelection(fields, r);
   };
+
+  // Picking several rows: click selects one, Ctrl/Cmd toggles, Shift selects a range; touch toggles on every tap
+  let selection = { rows: new Set(), anchor: null, fields: [], record: null };
+  const coarse = window.matchMedia('(pointer: coarse)');
+
+  const selectedText = () => {
+    const picked = [...selection.rows].sort((a, b) => a - b).map((i) => selection.fields[i]);
+    if (picked.length === 1) return selection.record[picked[0][0]];
+    return picked.map(([k, l]) => `${l}: ${selection.record[k]}`).join('\n');
+  };
+
+  const paintSelection = () => {
+    card.querySelectorAll('[data-row]').forEach((row) => {
+      const on = selection.rows.has(+row.dataset.row);
+      row.classList.toggle('is-selected', on);
+      row.setAttribute('aria-selected', String(on));
+    });
+    // floating contact buttons would cover the selection bar
+    document.body.classList.toggle('rq-selecting', selection.rows.size > 0);
+    const bar = card.querySelector('[data-selbar]');
+    if (!bar) return;
+    bar.hidden = selection.rows.size === 0;
+    bar.querySelector('[data-sel-count]').textContent = selection.rows.size;
+    bar.querySelector('[data-copy-selected] [data-label]').textContent =
+      selection.rows.size === 1 ? 'Скопировать значение' : 'Скопировать выбранные';
+  };
+
+  const setupSelection = (fields, record) => {
+    selection = { rows: new Set(), anchor: null, fields, record };
+    const lines = card.querySelector('[data-lines]');
+    // Shift+click would otherwise highlight page text
+    lines.addEventListener('mousedown', (e) => { if (e.shiftKey && !e.target.closest('.rq-copy')) e.preventDefault(); });
+    lines.addEventListener('click', (e) => {
+      const row = e.target.closest('[data-row]');
+      if (!row || e.target.closest('.rq-copy')) return;
+      if (!e.shiftKey && !e.ctrlKey && !e.metaKey && String(getSelection()).trim()) return; // let people select text by dragging
+      const i = +row.dataset.row;
+      if (e.shiftKey && selection.anchor !== null) {
+        const [a, b] = [Math.min(selection.anchor, i), Math.max(selection.anchor, i)];
+        if (!(e.ctrlKey || e.metaKey)) selection.rows.clear();
+        for (let n = a; n <= b; n++) selection.rows.add(n);
+      } else if (e.ctrlKey || e.metaKey || coarse.matches) {
+        if (selection.rows.has(i)) selection.rows.delete(i); else selection.rows.add(i);
+        selection.anchor = i;
+      } else {
+        const only = selection.rows.size === 1 && selection.rows.has(i);
+        selection.rows.clear();
+        if (!only) selection.rows.add(i);
+        selection.anchor = i;
+      }
+      paintSelection();
+    });
+    card.querySelector('[data-copy-selected]').addEventListener('click', (e) => copy(selectedText(), e.currentTarget));
+    card.querySelector('[data-sel-clear]').addEventListener('click', () => { selection.rows.clear(); selection.anchor = null; paintSelection(); });
+    paintSelection();
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if (!selection.rows.size || !card.contains(document.querySelector('[data-selbar]'))) return;
+    const typing = e.target.closest('input, textarea, select, [contenteditable="true"]');
+    if (e.key === 'Escape' && !typing) { selection.rows.clear(); paintSelection(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !typing && !String(getSelection()).trim()) {
+      e.preventDefault();
+      copy(selectedText(), card.querySelector('[data-copy-selected]'));
+    }
+  });
 
   const syncHash = () => {
     const t = tax();
