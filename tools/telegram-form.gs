@@ -9,7 +9,12 @@
  *  4. Project Settings → Script properties → add TELEGRAM_TOKEN = the token.
  *  5. Select the setup function and press Run; allow access. The log shows the chat it found.
  *  6. Deploy → New deployment → Web app: Execute as «Me», Who has access «Anyone».
- *     Put the web app URL into data-endpoint of the forms in index.html.
+ *     Put the web app URL into FORM_ENDPOINT in script.js.
+ *
+ * Google Sheets log (optional): select setupSheet and press Run once. It creates the
+ * «Заявки с сайта БалансПро» spreadsheet in your Drive and logs its link; every request is
+ * then added as a row. After changing this code: Deploy → Manage deployments → edit →
+ * Version: New version, so the web app URL stays the same.
  */
 
 const MAX_PER_HOUR = 30; // a cap against form spam
@@ -28,6 +33,29 @@ function setup() {
   Logger.log(`Chat saved: ${chat.id} (${chat.first_name || chat.title || ''})`);
 }
 
+const HEADERS = ['Дата и время', 'Форма', 'Имя', 'Телефон', 'E-mail', 'Сообщение', 'Страница', 'Статус'];
+
+const STATUSES = ['Новая', 'В работе', 'Клиент', 'Отказ'];
+
+function setupSheet() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('SHEET_ID')) {
+    Logger.log(`Already set up: ${SpreadsheetApp.openById(props.getProperty('SHEET_ID')).getUrl()}`);
+    return;
+  }
+  const book = SpreadsheetApp.create('Заявки с сайта БалансПро');
+  book.setSpreadsheetTimeZone('Europe/Minsk');
+  const sheet = book.getSheets()[0].setName('Заявки');
+  sheet.appendRow(HEADERS);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#efe6fb');
+  sheet.getRange('A:A').setNumberFormat('dd.mm.yyyy hh:mm');
+  sheet.getRange('H2:H').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(STATUSES).build());
+  [140, 140, 160, 150, 200, 320, 260, 120].forEach((w, i) => sheet.setColumnWidth(i + 1, w));
+  props.setProperty('SHEET_ID', book.getId());
+  Logger.log(`Spreadsheet: ${book.getUrl()}`);
+}
+
 function doPost(e) {
   const p = (e && e.parameter) || {};
   // Bots fill the hidden field; people never see it
@@ -42,17 +70,47 @@ function doPost(e) {
   if (count >= MAX_PER_HOUR) return reply_('busy');
   cache.put('count', String(count + 1), 3600);
 
+  const lead = {
+    form: clean('form'), name, phone, email: clean('email'), message: clean('message'), page: clean('page'),
+  };
+  // Each channel on its own: a Sheets hiccup must not lose the Telegram message, and back
+  let saved = false;
+  try {
+    saved = save_(lead);
+  } catch (err) {
+    console.error('Sheet: ' + err);
+  }
+  try {
+    notify_(lead);
+  } catch (err) {
+    console.error('Telegram: ' + err);
+    if (!saved) throw err;
+  }
+  return reply_('ok');
+}
+
+function save_(lead) {
+  const id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  if (!id) return false;
+  // A leading = + - @ would make Sheets treat the text as a formula
+  const text = (v) => (/^[=+\-@]/.test(v) ? `'${v}` : v);
+  SpreadsheetApp.openById(id).getSheetByName('Заявки').appendRow([
+    new Date(), lead.form, text(lead.name), text(lead.phone), text(lead.email), text(lead.message), lead.page, STATUSES[0],
+  ]);
+  return true;
+}
+
+function notify_({ form, name, phone, email, message, page }) {
   const lines = [
-    '📩 <b>Новая заявка с сайта</b>' + (clean('form') ? ` — ${esc_(clean('form'))}` : ''),
+    '📩 <b>Новая заявка с сайта</b>' + (form ? ` — ${esc_(form)}` : ''),
     '',
     `<b>Имя:</b> ${esc_(name)}`,
     `<b>Телефон:</b> ${esc_(phone)}`,
   ];
-  if (clean('email')) lines.push(`<b>E-mail:</b> ${esc_(clean('email'))}`);
-  if (clean('message')) lines.push('', esc_(clean('message')));
-  if (clean('page')) lines.push('', `<i>${esc_(clean('page'))}</i>`);
+  if (email) lines.push(`<b>E-mail:</b> ${esc_(email)}`);
+  if (message) lines.push('', esc_(message));
+  if (page) lines.push('', `<i>${esc_(page)}</i>`);
   send_(lines.join('\n'));
-  return reply_('ok');
 }
 
 function send_(text) {
