@@ -189,7 +189,8 @@ button { font: inherit; cursor: pointer; }
 .nav .sub-menu a:hover { background: var(--soft); color: var(--accent); }
 .nav-item:hover .sub-menu, .nav-item:focus-within .sub-menu, .nav-item.is-open .sub-menu { opacity: 1; visibility: visible; translate: 0 0; }
 
-.header-actions { display: flex; align-items: center; gap: 16px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.header-actions .btn { padding: 9px 18px; }
 .header-phone { font-weight: 700; color: var(--ink); font-size: 15px; white-space: nowrap; }
 .header-phone:hover { color: var(--accent); }
 
@@ -1089,13 +1090,6 @@ a.svc:hover .svc-go { translate: 4px 0; }
 @media (max-width: 1500px) {
   .nav > a, .nav-sub-toggle { padding: 9px 11px; }
   .header-inner { gap: 14px; }
-}
-
-.show-lg { display: none; }
-
-@media (max-width: 1440px) {
-  .hide-lg { display: none; }
-  .show-lg { display: inline; }
 }
 
 @media (max-width: 1320px) {
