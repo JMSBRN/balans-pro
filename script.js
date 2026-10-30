@@ -166,7 +166,10 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Forms: client-side validation only, there is no backend yet
+// Forms go to Telegram through a Google Apps Script web app (tools/telegram-form.gs),
+// which keeps the bot token out of the site code. Paste the web app URL here.
+const FORM_ENDPOINT = '';
+
 document.querySelectorAll('[data-form]').forEach((form) => {
   const status = form.querySelector('.form-status');
 
@@ -195,8 +198,30 @@ document.querySelectorAll('[data-form]').forEach((form) => {
       return;
     }
 
-    status.textContent = 'Спасибо! Заявка принята, мы скоро свяжемся с вами.';
-    form.reset();
+    if (!FORM_ENDPOINT) {
+      status.classList.add('is-error');
+      status.textContent = 'Форма пока не подключена — позвоните или напишите нам в Telegram.';
+      return;
+    }
+
+    const data = new URLSearchParams(new FormData(form));
+    data.set('form', form.querySelector('h2')?.textContent.trim() || '');
+    data.set('page', location.href);
+    const button = form.querySelector('[type="submit"]');
+    button.disabled = true;
+    status.textContent = 'Отправляем…';
+    // no-cors: the web app answers from another origin, so the reply can't be read; a network
+    // failure still rejects
+    fetch(FORM_ENDPOINT, { method: 'POST', mode: 'no-cors', body: data })
+      .then(() => {
+        status.textContent = 'Спасибо! Заявка отправлена, мы скоро свяжемся с вами.';
+        form.reset();
+      })
+      .catch(() => {
+        status.classList.add('is-error');
+        status.textContent = 'Не удалось отправить заявку. Проверьте интернет или позвоните нам.';
+      })
+      .finally(() => { button.disabled = false; });
   });
 
   form.addEventListener('input', (e) => {

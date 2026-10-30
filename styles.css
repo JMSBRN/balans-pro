@@ -797,6 +797,8 @@ a.svc:hover .svc-go { translate: 4px 0; }
 .contact-form .btn { align-self: flex-start; min-width: 220px; }
 .form-status { min-height: 1.4em; font-size: 14px; font-weight: 600; color: var(--accent-dark); }
 .form-status.is-error { color: #ef4444; }
+/* Ловушка для спам-ботов: людям поле не видно */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 /* ---------- Подвал ---------- */
 .site-footer { margin-top: 60px; padding-top: 50px; background: var(--ink); color: rgba(255, 255, 255, .7); border-radius: 48px 48px 0 0; }
