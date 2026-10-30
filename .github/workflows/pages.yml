@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      test_mail:
+        description: 'Send the indicators e-mail even if nothing needs attention'
+        type: boolean
+        default: false
   # Daily rebuild picks up new indicator values (06:17 in Minsk)
   schedule:
     - cron: '17 3 * * *'
@@ -42,10 +47,32 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # Fails (and GitHub e-mails the owner) once a hand-kept value in assets/data/pokazateli.json is due for review
-  freshness:
+  # On Monday's scheduled run (or a manual one) e-mails a reminder if a hand-kept value is due within two weeks
+  # or an automatic source failed. Needs repository secrets MAIL_USERNAME (the Gmail address that sends and
+  # receives the reminder) and MAIL_PASSWORD (a Gmail app password); without them the mail step is skipped.
+  notify:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
+    env:
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check hand-kept indicators
-        run: python3 tools/update_pokazateli.py --check
+      - name: Check indicators
+        id: report
+        run: |
+          if [ "${{ github.event_name }}" = schedule ] && [ "$(date +%u)" != 1 ]; then echo "Reminders go out on Mondays"; exit 0; fi
+          python3 tools/update_pokazateli.py --report report.txt ${{ inputs.test_mail && '--always' || '' }}
+          if [ -f report.txt ]; then echo "send=yes" >> "$GITHUB_OUTPUT"; fi
+      - name: E-mail the reminder
+        if: steps.report.outputs.send == 'yes' && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: БалансПро сайт <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_USERNAME }}
+          subject: 'БалансПро: пора обновить показатели на сайте'
+          body: file://report.txt

@@ -1,15 +1,16 @@
 """Refreshes assets/data/pokazateli.json from the sources that publish the indicators.
 
 Runs in the Pages workflow before build.py (daily and on every push):
-    python3 tools/update_pokazateli.py          # update the file in place
-    python3 tools/update_pokazateli.py --check  # fail if a hand-kept value is due for review
+    python3 tools/update_pokazateli.py                     # update the file in place
+    python3 tools/update_pokazateli.py --report report.txt  # write a reminder e-mail if anything needs a person
+    python3 tools/update_pokazateli.py --report report.txt --always  # ...or a test one regardless
 
 Base value, base rent value and the subsistence budget come from the reference
 tables of bii.by, where the newest row is on top; the refinancing rate comes
 from the National Bank API. A source that can't be reached or parsed leaves
 the last known value in place. The minimum wage, the childcare allowance and
-the tax rates are kept by hand: each has a review_by/until date, and --check
-fails the workflow once that date has passed, so GitHub e-mails a reminder.
+the tax rates are kept by hand: each has a review_by date, and --report writes
+a reminder e-mail two weeks before it (the workflow sends it on Mondays).
 """
 import json
 import re
@@ -121,10 +122,11 @@ FETCHERS = {'bv': from_since_table, 'bav': from_since_table, 'bpm': bpm, 'refin'
 MAX_CHANGE = 0.5
 
 
-def update():
+def update(write=True):
+    """Pulls the automatic values; returns the problems met, in Russian, for the e-mail report."""
     data = json.loads(DATA.read_text(encoding='utf-8'))
     today = date.today().isoformat()
-    ok = True
+    problems = []
     for item in data['indicators']:
         fetcher = FETCHERS.get(item['id']) if item.get('auto') else None
         if not fetcher:
@@ -136,14 +138,16 @@ def update():
         else:
             why = 'no current row found'
         if not got:
-            ok = False
+            problems.append(f'{item["title"]}: источник не ответил или изменил вид страницы ({why}). '
+                            f'На сайте остаётся {item["value"]} с {item["since"]}. Источник: {item["source"]}')
             print(f'::warning::{item["abbr"]}: kept {item["value"]} from {item["since"]} ({why})')
             continue
         if got['since'] < item['since']:
             print(f'{item["abbr"]}: source still shows {got["since"]}, kept {item["value"]} from {item["since"]}')
             continue
         if abs(got['value'] - item['value']) > MAX_CHANGE * item['value']:
-            ok = False
+            problems.append(f'{item["title"]}: источник дал {got["value"]} вместо {item["value"]} — слишком большой скачок, '
+                            f'значение не принято, проверьте вручную. Источник: {item["source"]}')
             print(f'::warning::{item["abbr"]}: {got["value"]} looks wrong next to {item["value"]}, kept the old value')
             continue
         if (got['value'], got['since']) != (item['value'], item['since']):
@@ -155,20 +159,53 @@ def update():
         item.update(got)
         if 'until' not in got:
             item.pop('until', None)
-    if ok:
-        data['checked'] = today
-    DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    if write:
+        if not problems:
+            data['checked'] = today
+        DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return problems, data
 
 
-def check():
-    data = json.loads(DATA.read_text(encoding='utf-8'))
-    today = date.today().isoformat()
-    due = [f'{i["title"]} (срок {i["review_by"]})' for i in data['indicators'] if i.get('review_by', '9999') <= today]
-    due += [f'Ставки налогов (срок {data["taxes_review_by"]})'] if data['taxes_review_by'] <= today else []
-    for d in due:
-        print(f'::error::Пора обновить в assets/data/pokazateli.json: {d}')
-    sys.exit(1 if due else 0)
+# Reminders start this many days before a hand-kept value is due
+NOTICE_DAYS = 14
+
+
+def report(path, always=False):
+    """Writes the reminder e-mail to `path` if anything needs a person; writes nothing otherwise."""
+    problems, data = update(write=False)
+    today = date.today()
+    soon = date.fromordinal(today.toordinal() + NOTICE_DAYS).isoformat()
+    due = []
+    for i in data['indicators']:
+        if i.get('review_by', '9999') <= soon:
+            due.append(f'{i["title"]}: сейчас на сайте {i["value"]} {i["unit"]} с {i["since"]}, '
+                       f'проверить до {i["review_by"]}. Источник: {i["source"]}')
+        elif i.get('until', '9999') < today.isoformat():
+            due.append(f'{i["title"]}: срок действия {i["value"]} {i["unit"]} закончился {i["until"]}, '
+                       f'а новое значение так и не появилось в источнике. Источник: {i["source"]}')
+    if data['taxes_review_by'] <= soon:
+        due.append(f'Ставки налогов: проверить до {data["taxes_review_by"]} (обычно меняются с 1 января).')
+    if not (due or problems or always):
+        print('Nothing to report')
+        return
+    parts = ['Здравствуйте!', '', 'Еженедельная проверка страницы «Актуальная информация» на сайте БалансПро.']
+    if due:
+        parts += ['', 'Пора проверить и обновить:'] + [f'— {d}' for d in due]
+    if problems:
+        parts += ['', 'Автоматическое обновление не сработало:'] + [f'— {p}' for p in problems]
+    if not (due or problems):
+        parts += ['', 'Всё в порядке: автоматические источники ответили, ручные показатели обновлять пока не нужно. '
+                  'Это пробное письмо — обычные приходят только когда что-то требует внимания.']
+    parts += ['', 'Как обновить: поправьте значения и даты в файле assets/data/pokazateli.json '
+              '(у пересмотренного показателя сдвиньте review_by на следующий срок) — или пришлите новые цифры Claude.',
+              '', 'Страница: https://jmsbrn.github.io/balans-pro/pokazateli/',
+              'Файл: https://github.com/JMSBRN/balans-pro/blob/main/assets/data/pokazateli.json']
+    Path(path).write_text('\n'.join(parts) + '\n', encoding='utf-8')
+    print('\n'.join(parts))
 
 
 if __name__ == '__main__':
-    check() if '--check' in sys.argv else update()
+    if '--report' in sys.argv:
+        report(sys.argv[sys.argv.index('--report') + 1], '--always' in sys.argv)
+    else:
+        update()
