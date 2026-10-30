@@ -1061,9 +1061,8 @@ a.svc:hover .svc-go { translate: 4px 0; }
   font: 600 11px/1.5 var(--font);
   color: var(--ink);
 }
-.rq-line.is-picked { background: #efe6fb; box-shadow: inset 3px 0 0 var(--accent); }
 .rq-copy { user-select: none; }
-.rq-line.is-picked .rq-copy { background: var(--accent); border-color: var(--accent); color: var(--white); }
+.rq-line.is-picked .rq-copy { background: #2f9e6e; border-color: #2f9e6e; color: var(--white); }
 .rq-line .rq-copy.is-copied { background: #2f9e6e; border-color: #2f9e6e; color: var(--white); }
 .rq-selbar {
   position: sticky;

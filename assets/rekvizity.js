@@ -125,7 +125,7 @@
       const on = picked.set.has(+row.dataset.row);
       row.classList.toggle('is-picked', on);
       const label = row.querySelector('.rq-copy [data-label]');
-      if (!row.querySelector('.rq-copy').classList.contains('is-copied')) label.textContent = on ? '✓ В наборе' : 'Скопировать';
+      if (!row.querySelector('.rq-copy').classList.contains('is-copied')) label.textContent = on ? '✓ Скопировано' : 'Скопировать';
     });
     // floating contact buttons would cover the bar
     document.body.classList.toggle('rq-selecting', picked.set.size > 0);
@@ -162,7 +162,7 @@
         paintPicked();
         if (picked.set.size) {
           await copy(pickedText(), btn);
-          setTimeout(paintPicked, 2050); // restore '✓ В наборе' labels after the copy flash
+          setTimeout(paintPicked, 2050); // restore labels after the copy flash
         }
       });
     });
